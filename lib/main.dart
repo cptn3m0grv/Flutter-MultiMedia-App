@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:audioplayers/audio_cache.dart';
+import 'package:video_player/video_player.dart';
 
 
 AudioPlayer player = new AudioPlayer();
@@ -15,6 +16,7 @@ class MyApp extends StatelessWidget{
         '/' : (context) => HomePage(),
         '/offlineSong' : (context) => OfflineSong(),
         '/onlineSong' : (context) => OnlineSong(),
+        '/offlineVideo' : (context) => OfflineVideo(),
       },
       debugShowCheckedModeBanner: false,
     );
@@ -65,7 +67,7 @@ class HomePage extends StatelessWidget{
                   Card(
                     child: FlatButton(
                       onPressed: () {
-                        print("Second button");
+                        Navigator.pushNamed(context, '/offlineVideo');
                       },
                       child: Text(
                         "           Offline Video           ",
@@ -213,15 +215,20 @@ class OfflineSong extends StatelessWidget{
 
 class OnlineSong extends StatelessWidget{
   
-  String url;
+  String url = 'https://github.com/cptn3m0grv/Flutter-MultiMedia-App/blob/master/assets/audios/song.mp3?raw=true';
   var stopped = 1;
   var playing = 0;
 
-  playButton() async{
+  playButton(url) async{
     if(playing == 0 || stopped == 1){
-      player.play(url);
-      playing = 1;
-      stopped = 0;
+      int result = await player.play(url);
+      if(result == 1){
+        playing = 1;
+        stopped = 0;
+      }
+      else{
+        print('Check URL');
+      }
     }
   }
 
@@ -285,7 +292,7 @@ class OnlineSong extends StatelessWidget{
                     IconButton(
                       icon: Icon(Icons.stop), 
                       onPressed: () {
-                        // stopButton();
+                        stopButton();
                       },
                     ),
                     // Text("      "),
@@ -293,14 +300,14 @@ class OnlineSong extends StatelessWidget{
                       iconSize: 40,
                       icon: Icon(Icons.play_arrow), 
                       onPressed: () {
-                        // playButton();
+                        playButton(url);
                       },
                     ),
                     // Text("     "),
                     IconButton(
                       icon: Icon(Icons.pause), 
                       onPressed: () {
-                        // pauseButton();
+                        pauseButton();
                       },
                     ),
                   ],
@@ -312,4 +319,50 @@ class OnlineSong extends StatelessWidget{
       ),
     );
   }
+}
+
+class OfflineVideo extends StatefulWidget{
+  OfflineVideo() : super();
+  final String title = "Video Player";
+
+  @override
+  _OfflineVideo createState() => _OfflineVideo();
+}
+
+class _OfflineVideo extends State<OfflineVideo>{
+  VideoPlayerController _controller;
+  Future<void> _initializeVideoPlayerFuture;
+
+  @override
+  void initState(){
+    super.initState();
+    _controller = VideoPlayerController.asset(
+      "assets/videos/flyingKick.mp4",
+    );
+    _initializeVideoPlayerFuture = _controller.initialize();
+    _controller.setLooping(true);
+    super.initState();
+  }
+
+  @override
+  void dispose(){
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context){
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "Video Player",
+          style: TextStyle(
+            fontFamily: 'Satisfy',
+            fontSize: 30,
+          ),
+        ),
+      ),
+    );
+  }
+
 }
