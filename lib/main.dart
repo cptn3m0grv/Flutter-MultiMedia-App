@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget{
         '/offlineSong' : (context) => OfflineSong(),
         '/onlineSong' : (context) => OnlineSong(),
         '/offlineVideo' : (context) => OfflineVideo(),
-        // '/onlineVideo' : (context) => OnlineVideo(),
+        '/onlineVideo' : (context) => OnlineVideo(),
       },
       debugShowCheckedModeBanner: false,
     );
@@ -97,7 +97,7 @@ class HomePage extends StatelessWidget{
                   Card(
                     child: FlatButton(
                       onPressed: () {
-                        print("Fourth button");
+                        Navigator.pushNamed(context, '/onlineVideo'); 
                       },
                       child: Text(
                         "           Online Video           ",
@@ -324,7 +324,6 @@ class OnlineSong extends StatelessWidget{
 
 class OfflineVideo extends StatefulWidget{
   OfflineVideo() : super();
-  final String title = "Video Player";
 
   @override
   _OfflineVideo createState() => _OfflineVideo();
@@ -450,10 +449,159 @@ class _OfflineVideo extends State<OfflineVideo>{
   }
 }
 
-// class OnlineVideo extends StatefulWidget{
-//   OnlineVideo() : super();
-//   final String title = "Video Player";
+String vid = 'https://archive.org/download/SampleVideo1280x7205mb/SampleVideo_1280x720_5mb.mp4';
 
-//   @override
-//   _OnlineVideo createState() => _OnlineVideo();
-// }
+class OnlineVideo extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'Online Video',
+            style: TextStyle(
+              fontFamily: 'Satisfy',
+              fontSize: 30,
+            ),
+          ),
+        ),
+        body: Center(
+          child: Stack(
+            alignment: Alignment.center,
+            children: <Widget>[
+              Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                margin: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(
+                    color: Color.fromARGB(255, 90, 185, 234),
+                    width: 6,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  children: <Widget>[
+                    TextField(
+                      onChanged: (value) {
+                        vid = value;
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'URL of the song',
+                        prefixIcon: Icon(Icons.search),
+                      ),
+                    ),
+                    Card(
+                      child: FlatButton(
+                        onPressed: () {
+                          VideoPlayerRemote(url: vid);
+                        },
+                        child: Text("Run"),
+                      ),
+                    ),
+                    VideoPlayerRemote(
+                      url: vid,
+                    ),
+                  ],
+                ),
+              ),
+
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class VideoPlayerRemote extends StatefulWidget {
+  final String url;
+  VideoPlayerRemote({this.url});
+  @override
+  _VideoPlayerRemoteState createState() => _VideoPlayerRemoteState();
+}
+
+class _VideoPlayerRemoteState extends State<VideoPlayerRemote> {
+  VideoPlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.network(
+      widget.url, //to access its parent class constructor or variable
+    );
+
+    _controller.addListener(() {
+      setState(() {});
+    });
+    _controller.setLooping(true); //loop through video
+    _controller.initialize(); //initialize the VideoPlayer
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose(); //dispose the VideoPlayer
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        children: <Widget>[
+          Container(padding: const EdgeInsets.only(top: 20.0)),
+          Container(
+            padding: const EdgeInsets.all(20),
+            child: AspectRatio(
+              aspectRatio: _controller.value.aspectRatio,
+              child: Stack(
+                alignment: Alignment.bottomCenter,
+                children: <Widget>[
+                  VideoPlayer(_controller),
+                  _PlayPauseOverlay(controller: _controller),
+                  VideoProgressIndicator(_controller, allowScrubbing: true),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlayPauseOverlay extends StatelessWidget {
+  const _PlayPauseOverlay({Key key, this.controller}) : super(key: key);
+
+  final VideoPlayerController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        AnimatedSwitcher(
+          duration: Duration(milliseconds: 50),
+          reverseDuration: Duration(milliseconds: 200),
+          child: controller.value.isPlaying
+              ? SizedBox.shrink()
+              : Container(
+                  color: Colors.black26,
+                  child: Center(
+                    child: Icon(
+                      Icons.play_arrow,
+                      color: Colors.white,
+                      size: 100.0,
+                    ),
+                  ),
+                ),
+        ),
+        GestureDetector(
+          onTap: () {
+            controller.play();
+          },
+        ),
+      ],
+    );
+  }
+}
