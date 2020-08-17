@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget{
         '/offlineSong' : (context) => OfflineSong(),
         '/onlineSong' : (context) => OnlineSong(),
         '/offlineVideo' : (context) => OfflineVideo(),
+        // '/onlineVideo' : (context) => OnlineVideo(),
       },
       debugShowCheckedModeBanner: false,
     );
@@ -362,7 +363,97 @@ class _OfflineVideo extends State<OfflineVideo>{
           ),
         ),
       ),
+      body: Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            Container(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              margin: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(
+                  color: Color.fromARGB(255, 90, 185, 234),
+                  width: 6,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: <Widget>[
+                  FutureBuilder(
+                    future: _initializeVideoPlayerFuture,
+                    builder: (context, snapshot) {
+                      if(snapshot.connectionState == ConnectionState.done) {
+                        return AspectRatio(
+                          aspectRatio: _controller.value.aspectRatio,
+                          child: VideoPlayer(_controller),
+                        );
+                      } else {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                    }
+                  ),
+                  Container(
+                    margin: EdgeInsets.all(20),
+                    padding: EdgeInsets.all(10),
+                    child: Column(
+                      children: <Widget>[
+                        Card(
+                          child: FlatButton(
+                            color: Color.fromARGB(255, 193, 200, 228),
+                            onPressed: () {
+                              setState(() {
+                                _controller.play();
+                              });
+                            },
+                            child: Text(
+                               "   Play    ",
+                               style: TextStyle(
+                                 fontFamily: 'Satisfy',
+                                 fontSize: 20,
+                               ),
+                            ),
+                          ),
+                        ),
+                        Card(
+                          child: FlatButton(
+                            color: Color.fromARGB(255, 193, 200, 228),
+                            onPressed: () {
+                              setState(() {
+                                if(_controller.value.isPlaying){
+                                  _controller.pause();
+                                } 
+                              });
+                            },
+                            child: Text(
+                              "   Pause   ",
+                              style: TextStyle(
+                                fontFamily: 'Satisfy',
+                                fontSize: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
-
 }
+
+// class OnlineVideo extends StatefulWidget{
+//   OnlineVideo() : super();
+//   final String title = "Video Player";
+
+//   @override
+//   _OnlineVideo createState() => _OnlineVideo();
+// }
