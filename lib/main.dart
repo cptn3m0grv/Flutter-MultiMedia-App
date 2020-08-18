@@ -1,3 +1,5 @@
+// This is the basic mobile application, to play audio and video from both the assets and network.
+
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:audioplayers/audio_cache.dart';
